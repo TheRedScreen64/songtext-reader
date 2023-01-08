@@ -1,0 +1,72 @@
+{
+   "name": "songtext-reader",
+   "icon": "res/icon.ico",
+   "version": "1.2.0",
+   "author": "TheRedScreen",
+   "description": "Manage all your songtexts",
+   "repository": "github:TheRedScreen64/songtext-reader",
+   "license": "ISC",
+   "main": "main.js",
+   "scripts": {
+      "start": "electron-forge start",
+      "package": "electron-forge package",
+      "make": "electron-forge make",
+      "publish": "electron-forge publish dotenv"
+   },
+   "devDependencies": {
+      "@electron-forge/cli": "^6.0.0-beta.66",
+      "@electron-forge/maker-deb": "^6.0.0-beta.66",
+      "@electron-forge/maker-rpm": "^6.0.0-beta.66",
+      "@electron-forge/maker-squirrel": "^6.0.0-beta.66",
+      "@electron-forge/maker-zip": "^6.0.0-beta.66",
+      "@electron-forge/publisher-github": "^6.0.0-beta.66",
+      "electron": "^13.0.1"
+   },
+   "dependencies": {
+      "dotenv": "^16.0.3",
+      "electron-squirrel-startup": "^1.0.0",
+      "update-electron-app": "^2.0.1"
+   },
+   "config": {
+      "forge": {
+         "packagerConfig": {
+            "icon": "res/icon.ico"
+         },
+         "makers": [
+            {
+               "name": "@electron-forge/maker-squirrel",
+               "config": {
+                  "name": "SongtextReader"
+               }
+            },
+            {
+               "name": "@electron-forge/maker-zip",
+               "platforms": [
+                  "darwin"
+               ]
+            },
+            {
+               "name": "@electron-forge/maker-deb",
+               "config": {}
+            },
+            {
+               "name": "@electron-forge/maker-rpm",
+               "config": {}
+            }
+         ],
+         "publishers": [
+            {
+               "name": "@electron-forge/publisher-github",
+               "config": {
+                  "repository": {
+                     "owner": "TheRedScreen64",
+                     "name": "songtext-reader"
+                  },
+                  "prerelease": false,
+                  "draft": true
+               }
+            }
+         ]
+      }
+   }
+}
