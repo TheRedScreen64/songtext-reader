@@ -1,7 +1,6 @@
 const { app, BrowserWindow, ipcMain, autoUpdater, dialog } = require("electron");
 
-let mainWindow;
-let settingsWindow;
+let mainWindow, settingsWindow;
 
 if (require("electron-squirrel-startup")) return app.quit();
 
@@ -11,7 +10,6 @@ require("update-electron-app")();
 function createWindow() {
    mainWindow = new BrowserWindow({
       icon: __dirname + "/res/icon.ico",
-      // frame: false,
       webPreferences: {
          nodeIntegration: true,
          contextIsolation: false,
@@ -20,10 +18,10 @@ function createWindow() {
       height: 600,
       minWidth: 800,
       minHeight: 300,
+      autoHideMenuBar: true,
    });
 
    mainWindow.loadFile("src/index.html");
-   mainWindow.removeMenu();
    //mainWindow.webContents.openDevTools()
 
    mainWindow.on("close", () => {
@@ -40,10 +38,10 @@ function createSettingsWindow() {
       },
       width: 400,
       height: 600,
+      autoHideMenuBar: true,
    });
 
    settingsWindow.loadFile("src/settings.html");
-   settingsWindow.removeMenu();
    //settingsWindow.webContents.openDevTools()
 }
 
