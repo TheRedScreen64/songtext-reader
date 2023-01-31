@@ -1,4 +1,5 @@
 package-lock.json
+publish.bat
 build
 node_modules
 dist

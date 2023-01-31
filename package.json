@@ -1,5 +1,6 @@
 {
    "name": "songtext-reader",
+   "productName": "Songtext Reader",
    "icon": "res/icon.ico",
    "version": "1.2.0",
    "author": "TheRedScreen",
@@ -11,7 +12,8 @@
       "start": "electron-forge start",
       "package": "electron-forge package",
       "make": "electron-forge make",
-      "publish": "electron-forge publish dotenv"
+      "publish": "start publish.bat",
+      "publish-env": "electron-forge publish"
    },
    "devDependencies": {
       "@electron-forge/cli": "^6.0.0-beta.66",
@@ -23,20 +25,20 @@
       "electron": "^13.0.1"
    },
    "dependencies": {
-      "dotenv": "^16.0.3",
       "electron-squirrel-startup": "^1.0.0",
       "update-electron-app": "^2.0.1"
    },
    "config": {
       "forge": {
          "packagerConfig": {
-            "icon": "res/icon.ico"
+            "icon": "res/icon"
          },
          "makers": [
             {
                "name": "@electron-forge/maker-squirrel",
                "config": {
-                  "name": "SongtextReader"
+                  "name": "SongtextReader",
+                  "setupIcon": "res/icon.ico"
                }
             },
             {
