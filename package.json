@@ -5,7 +5,7 @@
    "author": "TheRedScreen",
    "description": "Manage all your songtexts",
    "repository": "github:TheRedScreen64/songtext-reader",
-   "license": "ISC",
+   "license": "GPLV3",
    "main": "main.js",
    "scripts": {
       "start": "electron-forge start",
