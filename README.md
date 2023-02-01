@@ -1,5 +1,5 @@
 # <img align="left" src="res/icon.png" width="100" /> Songtext Reader
-![GitHub all releases](https://img.shields.io/github/downloads/TheRedScreen64/songtext-reader/total?style=for-the-badge)
+[![GitHub all releases](https://img.shields.io/github/downloads/TheRedScreen64/songtext-reader/total?style=for-the-badge)](https://github.com/TheRedScreen64/songtext-reader/releases)
 
 <br/>
 
