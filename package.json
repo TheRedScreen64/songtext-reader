@@ -2,7 +2,7 @@
    "name": "songtext-reader",
    "productName": "Songtext Reader",
    "icon": "res/icon.ico",
-   "version": "1.2.0",
+   "version": "1.3.0",
    "author": "TheRedScreen",
    "description": "Manage all your songtexts",
    "repository": "github:TheRedScreen64/songtext-reader",
@@ -16,11 +16,11 @@
       "publish-env": "electron-forge publish"
    },
    "devDependencies": {
-      "@electron-forge/cli": "^6.0.0-beta.66",
-      "@electron-forge/maker-deb": "^6.0.0-beta.66",
+      "@electron-forge/cli": "^6.0.5",
+      "@electron-forge/maker-deb": "^6.0.5",
       "@electron-forge/maker-rpm": "^6.0.0-beta.66",
-      "@electron-forge/maker-squirrel": "^6.0.0-beta.66",
-      "@electron-forge/maker-zip": "^6.0.0-beta.66",
+      "@electron-forge/maker-squirrel": "^6.0.5",
+      "@electron-forge/maker-zip": "^6.0.5",
       "@electron-forge/publisher-github": "^6.0.0-beta.66",
       "electron": "^13.0.1"
    },

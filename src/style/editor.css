@@ -1,0 +1,61 @@
+html,
+body {
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+}
+
+.fullnav-height {
+   height: 100%;
+}
+.full-height {
+   height: 100%;
+}
+
+.align-right {
+   text-align: right;
+}
+
+.editorDiv {
+   display: flex;
+   flex-direction: row;
+}
+
+#editorLines,
+#editorArea {
+   height: 100%;
+   margin: 0;
+   padding: 10px 0;
+   border-radius: 0;
+   resize: none;
+   font-size: 16px;
+   line-height: 1.2;
+   outline: none;
+}
+#editorLines {
+   padding-right: 1ch;
+   border-color: transparent;
+   overflow-y: hidden;
+   text-align: right;
+   box-shadow: none;
+   color: #707070;
+   background-color: #2b3035;
+   width: 3.5rem;
+}
+#editorArea {
+   padding-left: 10px;
+   padding-right: 10px;
+   background-color: #343a40;
+   width: 100%;
+   border-color: transparent;
+   color: #ffffff;
+}
+
+textarea:focus-visible {
+   outline: none;
+}
+
+.top-flex {
+   display: flex;
+   flex-direction: row;
+}

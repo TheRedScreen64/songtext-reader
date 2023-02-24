@@ -1,4 +1,5 @@
-const { app, BrowserWindow, ipcMain, autoUpdater, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, autoUpdater, dialog, ipcRenderer } = require("electron");
+const fs = require("fs");
 
 let mainWindow, settingsWindow;
 
@@ -22,7 +23,7 @@ function createWindow() {
    });
 
    mainWindow.loadFile("src/index.html");
-   //mainWindow.webContents.openDevTools()
+   // mainWindow.webContents.openDevTools();
 
    mainWindow.on("close", () => {
       app.quit();
@@ -79,4 +80,15 @@ ipcMain.on("folder:select", async (e, arg) => {
 
 ipcMain.on("version", (e) => {
    e.sender.send("version", app.getVersion());
+});
+
+ipcMain.on("editor:open", async (e, data) => {
+   await mainWindow.loadFile("src/editor.html");
+   mainWindow.webContents.send("editor:show", data);
+});
+ipcMain.on("editor:close", async (e, data) => {
+   fs.writeFile(data.file, data.data, (err) => {
+      if (err) throw err;
+   });
+   await mainWindow.loadFile("src/index.html");
 });
