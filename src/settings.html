@@ -16,7 +16,7 @@
          crossorigin="anonymous"
       ></script>
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
-      <link rel="stylesheet" href="settings.css" />
+      <link rel="stylesheet" href="style/settings.css" />
       <title>Settings</title>
    </head>
    <body>
@@ -36,7 +36,7 @@
       </div>
       <div class="p-2">
          <div class="card-body">
-            <div class="form-1">
+            <div class="form">
                <h4>File extensions</h4>
                <div class="form-check d-inline">
                   <input type="checkbox" name="check-txt" id="check-txt" onchange="saveSettings()" />
@@ -51,14 +51,13 @@
                   <label for="check-folders">.png</label>
                </div>
             </div>
-            <!-- <div class="form-2">
-               <h4>Custom file extensions</h4>
-               <div class="d-inline">
-                  <button class="btn btn-primary" style="font-size: 10px">
-                     <i class="fa-solid fa-plus"></i>
-                  </button>
+            <div class="form">
+               <h4>Editor</h4>
+               <div class="form-check d-inline">
+                  <input type="checkbox" name="editor-txt" id="editor-txt" onchange="saveSettings()" />
+                  <label for="editor-txt">.txt</label>
                </div>
-            </div> -->
+            </div>
          </div>
       </div>
    </body>

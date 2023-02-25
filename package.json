@@ -26,6 +26,7 @@
    },
    "dependencies": {
       "electron-squirrel-startup": "^1.0.0",
+      "fs-extra": "^11.1.0",
       "update-electron-app": "^2.0.1"
    },
    "config": {

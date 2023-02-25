@@ -1,26 +1,37 @@
-const fs = require("fs");
+const fs = require("fs-extra");
+const path = require("path");
 const { ipcRenderer } = require("electron");
-const os = require("os");
-const username = os.userInfo().username;
 
 const verElement = document.getElementById("version");
 
-fs.readFile("C:/Users/" + username + "/Documents/SongtextReader_Data.json", "utf8", (err, data) => {
-   if (err) {
-      console.log(err);
-      return;
+let settings;
+
+fs.readFile(
+   path.join(
+      process.env.APPDATA || (process.platform == "darwin" ? process.env.HOME + "/Library/Preferences" : process.env.HOME + "/.local/share"),
+      "SongtextReader",
+      "config.json"
+   ),
+   "utf8",
+   (err, data) => {
+      if (err) throw err;
+
+      settings = JSON.parse(data);
+      if (settings.extensions.txt) {
+         document.getElementById("check-txt").checked = true;
+      }
+      if (settings.extensions.pdf) {
+         document.getElementById("check-pdf").checked = true;
+      }
+      if (settings.extensions.png) {
+         document.getElementById("check-png").checked = true;
+      }
+
+      if (settings.editor.txt) {
+         document.getElementById("editor-txt").checked = true;
+      }
    }
-   json = JSON.parse(data);
-   if (json.allowedExtensions.includes("txt")) {
-      document.getElementById("check-txt").checked = true;
-   }
-   if (json.allowedExtensions.includes("pdf")) {
-      document.getElementById("check-pdf").checked = true;
-   }
-   if (json.allowedExtensions.includes("png")) {
-      document.getElementById("check-png").checked = true;
-   }
-});
+);
 
 function saveSettings() {
    settings = {
@@ -28,6 +39,9 @@ function saveSettings() {
          txt: document.getElementById("check-txt").checked,
          pdf: document.getElementById("check-pdf").checked,
          png: document.getElementById("check-png").checked,
+      },
+      editor: {
+         txt: document.getElementById("editor-txt").checked,
       },
    };
 

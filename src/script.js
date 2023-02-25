@@ -1,4 +1,5 @@
-const fs = require("fs");
+const fs = require("fs-extra");
+const path = require("path");
 const { ipcRenderer } = require("electron");
 const exec = require("child_process").exec;
 
@@ -6,19 +7,25 @@ var output = document.querySelector("#filelist");
 const os = require("os");
 const username = os.userInfo().username;
 
-var allowedFileTypes = [];
+let allowedFileTypes;
+let settings;
 
-fs.readFile("C:/Users/" + username + "/Documents/SongtextReader_Data.json", "utf8", (err, data) => {
-   if (err) {
-      console.log(err);
-      return;
+fs.readFile(
+   path.join(
+      process.env.APPDATA || (process.platform == "darwin" ? process.env.HOME + "/Library/Preferences" : process.env.HOME + "/.local/share"),
+      "SongtextReader",
+      "config.json"
+   ),
+   "utf8",
+   (err, data) => {
+      if (err) throw err;
+
+      settings = JSON.parse(data);
+      document.getElementById("folder").value = settings.directory;
+      allowedFileTypes = settings.extensions;
+      updateList(settings.directory);
    }
-   json = JSON.parse(data);
-   // console.log(json, json.directory);
-   document.getElementById("folder").value = json.directory;
-   allowedFileTypes = json.allowedExtensions;
-   updateList(json.directory);
-});
+);
 
 function sortReverse() {
    var ul = output;
@@ -27,7 +34,7 @@ function sortReverse() {
 
    for (var i = 0, l = lis.length; i < l; i++) vals.push(lis[i].innerHTML);
 
-   vals.reverse();
+   vals.sort().reverse();
 
    for (var i = 0, l = lis.length; i < l; i++) lis[i].innerHTML = vals[i];
 }
@@ -37,6 +44,7 @@ function sort() {
    var vals = [];
 
    for (var i = 0, l = lis.length; i < l; i++) vals.push(lis[i].innerHTML);
+
    vals.sort();
 
    for (var i = 0, l = lis.length; i < l; i++) lis[i].innerHTML = vals[i];
@@ -46,136 +54,108 @@ function search(keyword) {
    const scanDirectory = document.getElementById("folder").value;
    output.innerHTML = "";
    fs.readdirSync(scanDirectory).forEach((file) => {
-      try {
-         if (file.toLowerCase().indexOf(keyword) > -1) {
-            switch (true) {
-               case file.indexOf(".txt") > -1:
-                  if (allowedFileTypes.includes("txt")) {
-                     var item = document.createElement("li");
-                     item.innerHTML = file;
-                     item.setAttribute("id", '"" ' + '"' + scanDirectory + "/" + file + '"');
-                     item.setAttribute("class", "list-group-item list-group-item-action listItem");
-                     item.setAttribute("onclick", "openFile(this.id)");
-                     output.appendChild(item);
-                  }
-                  break;
-               case file.indexOf(".png") > -1:
-                  if (allowedFileTypes.includes("png")) {
-                     var item = document.createElement("li");
-                     item.innerHTML = file;
-                     item.setAttribute("id", '"" ' + '"' + scanDirectory + "/" + file + '"');
-                     item.setAttribute("class", "list-group-item list-group-item-action listItem");
-                     item.setAttribute("onclick", "openFile(this.id)");
-                     output.appendChild(item);
-                  }
-                  break;
-               case file.indexOf(".pdf") > -1:
-                  if (allowedFileTypes.includes("pdf")) {
-                     var item = document.createElement("li");
-                     item.innerHTML = '<i class="fa-solid fa-file-pdf me-2 text-secondary"></i>' + file;
-                     item.setAttribute("id", '"" ' + '"' + scanDirectory + "/" + file + '"');
-                     item.setAttribute("class", "list-group-item list-group-item-action listItem");
-                     item.setAttribute("onclick", "openFile(this.id)");
-                     output.appendChild(item);
-                  }
-                  break;
-               default:
-                  dir = scanDirectory;
-                  if (dir.charAt(dir.length - 1) != "/" || dir.charAt(dir.length - 1) != "\\") {
-                     dir = dir + "\\";
-                  }
-                  fs.stat(dir + file, (err, stats) => {
-                     if (err) throw err;
-                     if (stats.isDirectory()) {
-                        var item = document.createElement("li");
-                        item.innerHTML = '<i class="fa-solid fa-folder me-2 text-secondary"></i>' + file;
-                        item.setAttribute("id", '"" ' + '"' + scanDirectory + "/" + file + '"');
-                        item.setAttribute("class", "list-group-item list-group-item-action listItem");
-                        item.setAttribute("onclick", "openFile(this.id)");
-                        output.appendChild(item);
-                     }
-                  });
-                  break;
-            }
-         }
-      } catch (e) {
-         console.log(e);
+      if (file.toLowerCase().indexOf(keyword) > -1) {
+         createElement(file, scanDirectory);
       }
    });
 }
 
-function saveScanDirectory(scanDirectory) {
-   data = { directory: scanDirectory, allowedExtensions: allowedFileTypes };
-   json = JSON.stringify(data, null, 4);
+function saveConfig(scanDirectory) {
+   let json = {
+      directory: scanDirectory,
+      extensions: settings.extensions,
+      editor: settings.editor,
+   };
+
+   let data = JSON.stringify(json);
    try {
-      fs.writeFileSync("C:/Users/" + username + "/Documents/SongtextReader_Data.json", json, "utf-8");
-   } catch (e) {
-      console.log(e);
+      fs.outputFile(
+         path.join(
+            process.env.APPDATA || (process.platform == "darwin" ? process.env.HOME + "/Library/Preferences" : process.env.HOME + "/.local/share"),
+            "SongtextReader",
+            "config.json"
+         ),
+         data,
+         (err) => {
+            if (err) throw err;
+         }
+      );
+   } catch (err) {
+      console.error(err);
    }
+
+   updateList(scanDirectory);
 }
 
 function updateList(scanDirectory) {
-   saveScanDirectory(scanDirectory);
    output.innerHTML = "";
-   fs.readdirSync(scanDirectory).forEach((file) => {
-      try {
-         switch (true) {
-            case file.indexOf(".txt") > -1:
-               if (allowedFileTypes.includes("txt")) {
-                  var item = document.createElement("li");
-                  item.innerHTML = '<i class="fa-solid fa-file-lines me-2 text-secondary fs-5"></i>' + file;
-                  item.setAttribute("id", scanDirectory + "/" + file);
-                  item.dataset.type = "editor";
-                  item.setAttribute("class", "list-group-item list-group-item-action listItem");
-                  item.setAttribute("onclick", "openFile({ type: this.dataset.type, data: this.id })");
-                  output.appendChild(item);
-               }
-               break;
-            case file.indexOf(".png") > -1:
-               if (allowedFileTypes.includes("png")) {
-                  var item = document.createElement("li");
-                  item.innerHTML = '<i class="fa-solid fa-file-image me-2 text-secondary fs-5"></i>' + file;
-                  item.setAttribute("id", '"" ' + '"' + scanDirectory + "/" + file + '"');
-                  item.dataset.type = "default";
-                  item.setAttribute("class", "list-group-item list-group-item-action listItem");
-                  item.setAttribute("onclick", "openFile({ type: this.dataset.type, data: this.id })");
-                  output.appendChild(item);
-               }
-               break;
-            case file.indexOf(".pdf") > -1:
-               if (allowedFileTypes.includes("pdf")) {
-                  var item = document.createElement("li");
-                  item.innerHTML = '<i class="fa-solid fa-file-pdf me-2 text-secondary fs-5"></i>' + file;
-                  item.setAttribute("id", '"" ' + '"' + scanDirectory + "/" + file + '"');
-                  item.dataset.type = "default";
-                  item.setAttribute("class", "list-group-item list-group-item-action listItem");
-                  item.setAttribute("onclick", "openFile({ type: this.dataset.type, data: this.id })");
-                  output.appendChild(item);
-               }
-               break;
-            default:
-               dir = scanDirectory;
-               if (dir.charAt(dir.length - 1) != "/" || dir.charAt(dir.length - 1) != "\\") {
-                  dir = dir + "\\";
-               }
-               fs.stat(dir + file, (err, stats) => {
-                  if (err) throw err;
-                  if (stats.isDirectory()) {
-                     var item = document.createElement("li");
-                     item.innerHTML = '<i class="fa-solid fa-folder me-2 text-secondary"></i>' + file;
-                     item.setAttribute("id", '"" ' + '"' + scanDirectory + "/" + file + '"');
-                     item.dataset.type = "default";
-                     item.setAttribute("class", "list-group-item list-group-item-action listItem");
-                     item.setAttribute("onclick", "openFile({ type: this.dataset.type, data: this.id })");
-                     output.appendChild(item);
-                  }
-               });
-               break;
+   try {
+      fs.readdirSync(scanDirectory).forEach((file) => {
+         createElement(file, scanDirectory);
+      });
+   } catch (error) {
+      console.error(error);
+   }
+}
+
+function createElement(file, scanDirectory) {
+   switch (true) {
+      case file.indexOf(".txt") > -1:
+         if (allowedFileTypes.txt) {
+            var item = document.createElement("li");
+            item.innerHTML = '<i class="fa-solid fa-file-lines me-2 text-secondary fs-5"></i>' + file;
+            item.setAttribute("id", scanDirectory + "\\" + file);
+            if (settings.editor.txt) {
+               item.dataset.type = "editor";
+            } else {
+               item.dataset.type = "default";
+            }
+            item.setAttribute("class", "list-group-item list-group-item-action listItem");
+            item.setAttribute("onclick", "openFile({ type: this.dataset.type, data: this.id })");
+            output.appendChild(item);
          }
-      } catch (e) {
-         console.log(e);
-      }
-   });
+         break;
+      case file.indexOf(".png") > -1:
+         if (allowedFileTypes.png) {
+            var item = document.createElement("li");
+            item.innerHTML = '<i class="fa-solid fa-file-image me-2 text-secondary fs-5"></i>' + file;
+            item.setAttribute("id", '"" ' + '"' + scanDirectory + "\\" + file + '"');
+            item.dataset.type = "default";
+            item.setAttribute("class", "list-group-item list-group-item-action listItem");
+            item.setAttribute("onclick", "openFile({ type: this.dataset.type, data: this.id })");
+            output.appendChild(item);
+         }
+         break;
+      case file.indexOf(".pdf") > -1:
+         if (allowedFileTypes.pdf) {
+            var item = document.createElement("li");
+            item.innerHTML = '<i class="fa-solid fa-file-pdf me-2 text-secondary fs-5"></i>' + file;
+            item.setAttribute("id", '"" ' + '"' + scanDirectory + "\\" + file + '"');
+            item.dataset.type = "default";
+            item.setAttribute("class", "list-group-item list-group-item-action listItem");
+            item.setAttribute("onclick", "openFile({ type: this.dataset.type, data: this.id })");
+            output.appendChild(item);
+         }
+         break;
+      default:
+         dir = scanDirectory;
+         if (dir.charAt(dir.length - 1) != "/" || dir.charAt(dir.length - 1) != "\\") {
+            dir = dir + "\\";
+         }
+         fs.stat(dir + file, (err, stats) => {
+            if (err) throw err;
+            if (stats.isDirectory()) {
+               var item = document.createElement("li");
+               item.innerHTML = '<i class="fa-solid fa-folder me-2 text-secondary"></i>' + file;
+               item.setAttribute("id", '"" ' + '"' + scanDirectory + "\\" + file + '"');
+               item.dataset.type = "default";
+               item.setAttribute("class", "list-group-item list-group-item-action listItem");
+               item.setAttribute("onclick", "openFile({ type: this.dataset.type, data: this.id })");
+               output.appendChild(item);
+            }
+         });
+         break;
+   }
 }
 
 function openFile(file) {
@@ -203,46 +183,24 @@ function getCommandLine() {
 }
 
 ipcRenderer.on("settings", function (e, data) {
-   // console.log(data);
-   // console.log(allowedFileTypes);
    settings = data;
 
-   // Extensions
-   if (settings.extensions.txt) {
-      if (!allowedFileTypes.includes("txt")) {
-         allowedFileTypes.push("txt");
-      }
-   } else {
-      if (allowedFileTypes.includes("txt")) {
-         allowedFileTypes.splice(allowedFileTypes.indexOf("txt"), 1);
-      }
-   }
-   if (settings.extensions.pdf) {
-      if (!allowedFileTypes.includes("pdf")) {
-         allowedFileTypes.push("pdf");
-      }
-   } else {
-      if (allowedFileTypes.includes("pdf")) {
-         allowedFileTypes.splice(allowedFileTypes.indexOf("pdf"), 1);
-      }
-   }
-   if (settings.extensions.png) {
-      if (!allowedFileTypes.includes("png")) {
-         allowedFileTypes.push("png");
-      }
-   } else {
-      if (allowedFileTypes.includes("png")) {
-         allowedFileTypes.splice(allowedFileTypes.indexOf("png"), 1);
-      }
-   }
-   updateList(document.getElementById("folder").value);
-   // console.log(allowedFileTypes);
+   allowedFileTypes = settings.extensions;
+
+   saveConfig(document.getElementById("folder").value);
 });
 
 ipcRenderer.on("folder:selected", (e, data) => {
    if (data.length <= 0) {
       return;
    }
-   document.getElementById("folder").value = data;
-   updateList(document.getElementById("folder").value);
+
+   document.getElementById("folder").value = data[0];
+   saveConfig(data[0]);
+   console.log(data, " oder ", data[0]);
 });
+
+function updateDirectory(newDirectory) {
+   document.getElementById("folder").value = newDirectory;
+   updateList(document.getElementById("folder").value);
+}

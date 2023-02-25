@@ -39,7 +39,7 @@
                         class="form-control"
                         placeholder="Enter the path"
                         id="folder"
-                        onChange="updateList(document.getElementById('folder').value)"
+                        onChange="saveConfig(document.getElementById('folder').value)"
                      />
                      <button class="btn btn-primary" id="folder-select" onclick="ipcRenderer.send('folder:select')">
                         <i class="fa-solid fa-folder me-2"></i>Select folder

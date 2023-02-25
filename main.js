@@ -1,11 +1,46 @@
 const { app, BrowserWindow, ipcMain, autoUpdater, dialog, ipcRenderer } = require("electron");
-const fs = require("fs");
+const fs = require("fs-extra");
+const os = require("os");
+const path = require("path");
 
 let mainWindow, settingsWindow;
 
 if (require("electron-squirrel-startup")) return app.quit();
 
 require("update-electron-app")();
+
+fs.exists(
+   path.join(
+      process.env.APPDATA || (process.platform == "darwin" ? process.env.HOME + "/Library/Preferences" : process.env.HOME + "/.local/share"),
+      "SongtextReader",
+      "config.json"
+   ),
+   (exists) => {
+      if (!exists) {
+         fs.outputFile(
+            path.join(
+               process.env.APPDATA || (process.platform == "darwin" ? process.env.HOME + "/Library/Preferences" : process.env.HOME + "/.local/share"),
+               "SongtextReader",
+               "config.json"
+            ),
+            JSON.stringify({
+               directory: os.homedir(),
+               extensions: {
+                  txt: false,
+                  pdf: false,
+                  png: false,
+               },
+               editor: {
+                  txt: true,
+               },
+            }),
+            (err) => {
+               if (err) throw err;
+            }
+         );
+      }
+   }
+);
 
 //Functions
 function createWindow() {
@@ -43,7 +78,7 @@ function createSettingsWindow() {
    });
 
    settingsWindow.loadFile("src/settings.html");
-   //settingsWindow.webContents.openDevTools()
+   // settingsWindow.webContents.openDevTools();
 }
 
 app.on("ready", createWindow);
@@ -68,6 +103,7 @@ ipcMain.on("settings:open", function (e) {
 
 // Data transfer
 ipcMain.on("settings", function (e, data) {
+   console.log(data);
    mainWindow.webContents.send("settings", data);
 });
 
@@ -87,7 +123,7 @@ ipcMain.on("editor:open", async (e, data) => {
    mainWindow.webContents.send("editor:show", data);
 });
 ipcMain.on("editor:close", async (e, data) => {
-   fs.writeFile(data.file, data.data, (err) => {
+   fs.outputFile(data.file, data.data, (err) => {
       if (err) throw err;
    });
    await mainWindow.loadFile("src/index.html");

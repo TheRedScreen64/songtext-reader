@@ -1,0 +1,3 @@
+.form:not(:first-child) {
+   margin-top: 1rem;
+}
